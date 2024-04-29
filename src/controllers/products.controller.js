@@ -1,6 +1,6 @@
 import { getConnection, sql } from "../database/connection.js";
 
-export const getProducts = async (req, res) => {
+export const getProductswithPagination = async (req, res) => {
   try {
     const pool = await getConnection();
     const { pageNumber, pageSize } = req.query; 
@@ -127,3 +127,76 @@ export const UpdateProduct = async (req, res) =>{
   }
 
 }
+
+
+export const GetProductbyNamewithPagination = async (req, res) => {
+  try {
+    const pool = await getConnection();
+    const { pageNumber, pageSize } = req.query; 
+
+    const pageNumberInt = parseInt(pageNumber, 10) || 1;
+    const pageSizeInt = parseInt(pageSize, 10) || 10;
+
+    const result = await pool
+    .request()
+    .input("NOMBRE", req.params.NOMBRE)
+    .query("Exec SP_MostrarProductoporNombre @NOMBRE");
+
+
+    const startIndex = (pageNumberInt - 1) * pageSizeInt;
+    const endIndex = Math.min(startIndex + pageSizeInt, result.recordset.length);
+
+
+    const products = result.recordset.slice(startIndex, endIndex);
+
+
+    const response = {
+      totalItems: result.recordset.length,
+      products: products,
+      totalPages: Math.ceil(result.recordset.length / pageSizeInt),
+      currentPage: pageNumberInt
+    };
+
+    res.json(response);
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+};
+
+export const getAllProducts = async(req,res) =>{
+  try{
+
+    const pool  = await getConnection();
+
+    const result = await pool
+    .request().query("Exec SP_MostrarProducto")
+
+    const product = result.recordset
+    res.status(200).json(product);
+
+  }catch(error){
+    console.log('Error al obtener los productos',error.message);
+        res.status(500).send('Error del servidor');
+
+  }
+}
+
+export const getAllProductsbyName = async (req, res) => {
+  try {
+    const pool = await getConnection();
+
+    const result = await pool
+    .request()
+    .input("NOMBRE", req.params.NOMBRE)
+    .query("Exec SP_MostrarProductoporNombre @NOMBRE");
+
+
+
+    const products = result.recordset
+    res.json(products);
+
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+};
+

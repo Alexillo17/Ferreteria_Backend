@@ -6,21 +6,21 @@ export const ReporteFactura = async (req, res) => {
       const pool = await getConnection();
       const { pageNumber, pageSize } = req.query; 
   
-      // Convertir a números y establecer valores predeterminados si no se proporcionan
+
       const pageNumberInt = parseInt(pageNumber, 10) || 1;
       const pageSizeInt = parseInt(pageSize, 10) || 10;
   
-      // Ejecutar el procedimiento almacenado
+
       const result = await pool.request().query('Exec SP_MostrarFacturas');
   
-      // Calcular el índice de inicio y final de los datos para la página actual
+
       const startIndex = (pageNumberInt - 1) * pageSizeInt;
       const endIndex = Math.min(startIndex + pageSizeInt, result.recordset.length);
   
-      // Obtener las facturas para la página actual
+
       const facturas = result.recordset.slice(startIndex, endIndex);
   
-      // Construir el objeto de respuesta
+
       const response = {
         totalFacturas: result.recordset.length,
         facturas: facturas,
@@ -34,5 +34,102 @@ export const ReporteFactura = async (req, res) => {
       res.status(500).send('Error del servidor');
     }
   };
+
+  export const getFacturabyID = async(req, res) =>
+  {
+      try{
+          const pool = await getConnection();
+    
+          const result = await pool
+          .request()
+          .input("IDFACTURA", req.params.IDFACTURA)
+          .query("Exec SP_VerFacturaPorID @IDFACTURA");
+    
+          return res.json(result.recordset);
+    
+    
+      }catch(error){
+          res.status(500);
+          res.send(error.message);
+      }
+  }
+
+  export const createnewFactura = async (req, res) => {
+    const { IDEMPLEADO, IDCLIENTE, Fecha } = req.body;
+  
+    
+    try {
+      const pool = await getConnection();
+  
+      const result = await pool
+      .request()
+      .input("IDEMPLEADO", sql.Int, IDEMPLEADO)
+      .input("IDCLIENTE", sql.Int, IDCLIENTE)
+      .input("Fecha", sql.Date, Fecha)
+      .query(
+        "EXEC SP_IngresarFactura @IDEMPLEADO, @IDCLIENTE, @Fecha" 
+      );
+  
+      res.json({
+        IDEMPLEADO,
+        IDCLIENTE,
+        Fecha,
+      });
+    } catch (error) {
+      res.status(500);
+      res.send(error.message);
+    }
+  };
+
+  export const createnewDetalleFactura = async (req, res) => {
+    const { NUMEROFACTURA, IDPRODUCTO, Cantidad, PrecioUnitario } = req.body;
+  
+    
+    try {
+      const pool = await getConnection();
+  
+      const result = await pool
+      .request()
+      .input("NUMEROFACTURA", sql.Int, NUMEROFACTURA)
+      .input("IDPRODUCTO", sql.Int, IDPRODUCTO)
+      .input("Cantidad", sql.Int, Cantidad)
+      .input("PrecioUnitario", sql.Numeric(18,2), PrecioUnitario)
+      .query(
+        "EXEC SP_IngresarDetalleFactura @NUMEROFACTURA, @IDPRODUCTO, @Cantidad, @PrecioUnitario" 
+      );
+  
+      res.json({
+        NUMEROFACTURA,
+        IDPRODUCTO,
+        Cantidad,
+        PrecioUnitario
+      });
+    } catch (error) {
+      res.status(500);
+      res.send(error.message);
+    }
+  };
+
+  export const getUltimaFactura = async(req,res) =>{
+    try{
+  
+      const pool  = await getConnection();
+  
+      const result = await pool
+      .request().query("Exec SP_MostrarUltimaFactura")
+  
+      const factura = result.recordset
+      res.status(200).json(factura);
+  
+    }catch(error){
+      console.log('Error al obtener la factura',error.message);
+          res.status(500).send('Error del servidor');
+  
+    }
+  }
+
+
+
+
   
 

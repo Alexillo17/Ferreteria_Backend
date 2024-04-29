@@ -6,7 +6,8 @@ import productRoutes from "./routes/products.routes.js";
 import categoryRoutes from "./routes/categoria.routes.js"
 import proveedorRoutes from "./routes/proveedor.routes.js"
 import facturaRoutes from "./routes/factura.routes.js"
-
+import empleadoRoutes from "./routes/empleado.routes.js"
+import clienteRoutes from "./routes/cliente.routes.js"
 const app = express();
 
 app.use(cors());
@@ -15,7 +16,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // Routes
-app.use("/api", productRoutes,categoryRoutes,proveedorRoutes,facturaRoutes);
+app.use("/api", productRoutes,categoryRoutes,proveedorRoutes,facturaRoutes,empleadoRoutes,clienteRoutes);
 
 
 export default app;
