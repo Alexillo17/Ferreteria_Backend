@@ -1,7 +1,8 @@
 import { Router } from "express";
 
 import {getProveedorActivo,createnewProveedor, getProveedorbyID, updateProveedor,DeleteProveedor,
-    getAllProveedores 
+    getAllProveedores, 
+    getProveedorbyCedula
 } from "../controllers/proveedor.controller.js";
 
 const router = Router();
@@ -17,5 +18,7 @@ router.get("/proveedor/:IDPROVEEDOR",getProveedorbyID);
 router.put("/updateproveedor/:IDPROVEEDOR", updateProveedor);
 
 router.put("/deleteproveedor/:IDPROVEEDOR",DeleteProveedor);
+
+router.get("/proveedorcedula/:Cedula", getProveedorbyCedula)
 
 export default router;

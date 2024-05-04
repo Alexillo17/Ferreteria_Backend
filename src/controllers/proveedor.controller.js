@@ -155,5 +155,24 @@ export const createnewProveedor = async (req, res) => {
     }
 }
 
+export const getProveedorbyCedula = async(req,res) =>{
+  try{
+      
+    const pool = await getConnection();
+
+    const result = await pool
+    .request()
+    .input('Cedula', req.params.Cedula)
+    .query("Exec SP_BuscarCedulaExistenteProveedor @Cedula")
+
+    return res.json(result.recordset[0]);
+
+  }catch(error)
+  {
+      res.status(500);
+      res.send(error.message)
+  }
+}
+
 
 

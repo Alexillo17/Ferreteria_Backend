@@ -128,8 +128,28 @@ export const ReporteFactura = async (req, res) => {
     }
   }
 
-
-
-
+  export const EliminarProductodeFactura = async (req, res) => {
+    const NumeroFactura = req.params.NumeroFactura;
+    const IdProducto = req.params.IdProducto;
+  
+    try {
+      const pool = await getConnection(); 
+  
+      const result = await pool
+        .request()
+        .input("NumeroFactura", sql.Int, NumeroFactura)
+        .input("IdProducto", sql.Int, IdProducto)
+        .query("EXEC SP_EliminarProductodeFactura @NumeroFactura, @IdProducto");
+  
+      res.json({
+        NumeroFactura,
+        IdProducto,
+        message: 'Producto eliminado correctamente'
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
+  
   
 
