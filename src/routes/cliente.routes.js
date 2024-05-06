@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createnewCliente, getClientebyCedula, getClientes, getClientebyID, updateCliente, getClientesbyname, getClientesInactivos } from "../controllers/clientes.controller.js";
+import { createnewCliente, getClientebyCedula, getClientes, getClientebyID, updateCliente, getClientesbyname, getClientesInactivos, getClientesInactivosbyname, EliminarCliente } from "../controllers/clientes.controller.js";
 
 const router = Router();
 
@@ -17,6 +17,10 @@ router.get('/clientebyid/:IDCLIENTE',getClientebyID);
 router.put('/updatecliente/:IDCLIENTE',updateCliente);
 
 router.get('/clientebyname/:Nombre',getClientesbyname);
+
+router.get('/clienteinactivosbyname/:Nombre',getClientesInactivosbyname);
+
+router.put('/eliminarcliente/:IDCLIENTE',EliminarCliente);
 
 
 

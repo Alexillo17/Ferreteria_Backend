@@ -33,6 +33,39 @@ export const getProductswithPagination = async (req, res) => {
   }
 };
 
+export const getProductsInactivoswithPagination = async (req, res) => {
+  try {
+    const pool = await getConnection();
+    const { pageNumber, pageSize } = req.query; 
+
+    // Convertir a números y establecer valores predeterminados si no se proporcionan
+    const pageNumberInt = parseInt(pageNumber, 10) || 1;
+    const pageSizeInt = parseInt(pageSize, 10) || 10;
+
+    // Obtener todos los productos de la bd
+    const result = await pool.request().query("SP_MostrarProdutoInactivo");
+
+    // Calcular el índice de inicio y final de los datos para la página actual
+    const startIndex = (pageNumberInt - 1) * pageSizeInt;
+    const endIndex = Math.min(startIndex + pageSizeInt, result.recordset.length);
+
+    // Obtener los productos para la página actual
+    const products = result.recordset.slice(startIndex, endIndex);
+
+    // Construir el objeto de respuesta
+    const response = {
+      totalItems: result.recordset.length,
+      products: products,
+      totalPages: Math.ceil(result.recordset.length / pageSizeInt),
+      currentPage: pageNumberInt
+    };
+
+    res.json(response);
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+};
+
 export const getProductbyId = async(req,res) => {
   try{
       const pool = await getConnection();
@@ -163,6 +196,43 @@ export const GetProductbyNamewithPagination = async (req, res) => {
   }
 };
 
+export const GetProductInactivosbyNamewithPagination = async (req, res) => {
+  try {
+    const pool = await getConnection();
+    const { pageNumber, pageSize } = req.query; 
+
+    const pageNumberInt = parseInt(pageNumber, 10) || 1;
+    const pageSizeInt = parseInt(pageSize, 10) || 10;
+
+    const result = await pool
+    .request()
+    .input("NOMBRE", req.params.NOMBRE)
+    .query("Exec SP_MostrarProductoInactivoporNombre @NOMBRE");
+
+
+    const startIndex = (pageNumberInt - 1) * pageSizeInt;
+    const endIndex = Math.min(startIndex + pageSizeInt, result.recordset.length);
+
+
+    const products = result.recordset.slice(startIndex, endIndex);
+
+
+    const response = {
+      totalItems: result.recordset.length,
+      products: products,
+      totalPages: Math.ceil(result.recordset.length / pageSizeInt),
+      currentPage: pageNumberInt
+    };
+
+    res.json(response);
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+};
+
+
+
+
 export const getAllProducts = async(req,res) =>{
   try{
 
@@ -199,4 +269,25 @@ export const getAllProductsbyName = async (req, res) => {
     res.status(500).send(error.message);
   }
 };
+
+export const Eliminarproducto = async(req, res) =>
+  {
+      try{
+          const pool = await getConnection();
+    
+          const result = await pool
+          .request()
+          .input("IDPRODUCTO", req.params.IDPRODUCTO)
+          .query("Exec SP_DardebajaProducto @IDPRODUCTO");
+    
+  
+        return res.json({ message: "Producto Eliminado" });
+          
+    
+    
+      }catch(error){
+          res.status(500);
+          res.send(error.message);
+      }
+  }
 

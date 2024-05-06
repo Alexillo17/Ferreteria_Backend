@@ -151,6 +151,25 @@ export const geyClientebyID = async(req, res) =>
       }
     };
 
+    export const getClientesInactivosbyname = async (req, res) => {
+      try {
+        const pool = await getConnection();
+    
+        const result = await pool
+        .request()
+        .input("Nombre", req.params.Nombre)
+        .query("Exec SP_BuscaClienteInactivobyNombre @Nombre");
+    
+    
+    
+        const clientes = result.recordset
+        res.json(clientes);
+    
+      } catch (error) {
+        res.status(500).send(error.message);
+      }
+    };
+
     export const getClientesInactivos = async(req,res) =>{
 
       try{
@@ -169,6 +188,25 @@ export const geyClientebyID = async(req, res) =>
       }
     };
     
-
+    export const EliminarCliente = async(req, res) =>
+      {
+          try{
+              const pool = await getConnection();
+        
+              const result = await pool
+              .request()
+              .input("IDCLIENTE", req.params.IDCLIENTE)
+              .query("Exec SP_DardeBajacliente @IDCLIENTE");
+        
+      
+            return res.json({ message: "Cliente Eliminado" });
+              
+        
+        
+          }catch(error){
+              res.status(500);
+              res.send(error.message);
+          }
+      }
 
 

@@ -18,6 +18,24 @@ export const getEmpleados = async(req,res) =>{
     }
 }
 
+export const getEmpleadosInactivos = async(req,res) =>{
+
+    try{
+       
+        const pool = await getConnection();
+
+        const result = await pool
+        .request().query("Exec SP_MostrarEmpleadosInactivos")
+
+        const empleado = result.recordset
+        res.status(200).json(empleado)
+    }catch(error){
+
+        console.log('Error al obtener los empleados');
+        res.status(500).send('Error del servidor');
+    }
+}
+
 export const getEmpleadobyID = async(req,res) =>{
     try{
         
@@ -38,7 +56,7 @@ export const getEmpleadobyID = async(req,res) =>{
 }
 
 export const createnewEmpleado = async(req, res) => {
-   const {IDEMPLEADO, Nombre, Apellido, Cedula, Telefono} = req.body;
+   const {IDEMPLEADO, Nombre, Apellido, Cedula, Telefono, Estado} = req.body;
 
    if(Nombre == null || Cedula == null || Telefono == null) {
     return res,status(400),json({msg:  'Bad Rquest'})
@@ -54,8 +72,9 @@ export const createnewEmpleado = async(req, res) => {
        .input('Apellido', sql.VarChar(50), Apellido)
        .input('Cedula', sql.VarChar(50), Cedula)
        .input('Telefono', sql.Int,Telefono)
+       .input('Estado', sql.VarChar(20),Estado)
        .query(
-        "Exec SP_IngresarEmpleado @IDEMPLEADO, @Nombre, @Apellido, @Cedula, @Telefono"
+        "Exec SP_IngresarEmpleado @IDEMPLEADO, @Nombre, @Apellido, @Cedula, @Telefono, @Estado"
        );
 
        res.json({
@@ -63,7 +82,8 @@ export const createnewEmpleado = async(req, res) => {
         Nombre,
         Apellido,
         Cedula,
-        Telefono
+        Telefono,
+        Estado
        });
 
 
@@ -76,7 +96,7 @@ export const createnewEmpleado = async(req, res) => {
 }
 
 export const UpdatEmpleado = async(req, res) => {
-    const {IDEMPLEADO, Nombre, Apellido, Cedula, Telefono} = req.body;
+    const {IDEMPLEADO, Nombre, Apellido, Cedula, Telefono, Estado} = req.body;
  
     if(Nombre == null || Cedula == null || Telefono == null) {
      return res,status(400),json({msg:  'Bad Rquest'})
@@ -92,8 +112,9 @@ export const UpdatEmpleado = async(req, res) => {
         .input('Apellido', sql.VarChar(50), Apellido)
         .input('Cedula', sql.VarChar(50), Cedula)
         .input('Telefono', sql.Int,Telefono)
+        .input('Estado', sql.VarChar(20),Estado)
         .query(
-         "Exec SP_UpdateEmpleado @IDEMPLEADO, @Nombre, @Apellido, @Cedula, @Telefono"
+         "Exec SP_UpdateEmpleado @IDEMPLEADO, @Nombre, @Apellido, @Cedula, @Telefono, @Estado"
         );
  
         res.json({
@@ -101,7 +122,8 @@ export const UpdatEmpleado = async(req, res) => {
          Nombre,
          Apellido,
          Cedula,
-         Telefono
+         Telefono,
+         Estado
         });
  
  
@@ -132,4 +154,24 @@ export const UpdatEmpleado = async(req, res) => {
     }
   }
  
+  export const EliminarEmpleado = async(req, res) =>
+    {
+        try{
+            const pool = await getConnection();
+      
+            const result = await pool
+            .request()
+            .input("IDEMPLEADO", req.params.IDEMPLEADO)
+            .query("Exec SP_DardebajaEmpleado @IDEMPLEADO");
+      
+    
+          return res.json({ message: "Empleado Eliminado" });
+            
+      
+      
+        }catch(error){
+            res.status(500);
+            res.send(error.message);
+        }
+    }
 
