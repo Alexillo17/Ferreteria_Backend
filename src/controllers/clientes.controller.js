@@ -20,7 +20,7 @@ export const getClientebyCedula = async(req,res) =>{
 }
 
 export const createnewCliente = async (req, res) => {
-  const { Nombre, Apellido, Cedula } = req.body;
+  const { Nombre, Apellido, Cedula, Estado } = req.body;
 
   
   try {
@@ -31,14 +31,16 @@ export const createnewCliente = async (req, res) => {
     .input("Nombre", sql.VarChar(50), Nombre)
     .input("Apellido", sql.VarChar(50), Apellido)
     .input("Cedula", sql.VarChar(20), Cedula)
+    .input("Estado", sql.VarChar(20), Estado)
     .query(
-      "EXEC SP_IngresarCliente @Nombre, @Apellido, @Cedula" 
+      "EXEC SP_IngresarCliente @Nombre, @Apellido, @Cedula, @Estado" 
     );
 
     res.json({
       Nombre,
       Apellido,
       Cedula,
+      Estado
     });
   } catch (error) {
     res.status(500);
@@ -84,37 +86,33 @@ export const geyClientebyID = async(req, res) =>
   }
 
   export const updateCliente = async (req, res) => {
-    const {IDCLIENTE, Nombre, Apellido, Cedula } = req.body;
+    const { IDCLIENTE, Nombre, Apellido, Cedula, Estado } = req.body;
   
-    if (Nombre == null || Apellido == null || Cedula == null || IDCLIENTE== null) {
-      return res.status(400).json({ msg: "Bad Request. Please fill all fields" });
-    }
   
     try {
       const pool = await getConnection();
   
       const result = await pool
-      .request()
-      .input("IDCLIENTE", sql.Int, IDCLIENTE)
-      .input("Nombre", sql.VarChar(50), Nombre)
-      .input("Apellido", sql.VarChar(50), Apellido)
-      .input("Cedula", sql.VarChar(20), Cedula)
-      .query(
-        "EXEC SP_UpdateProveedor @IDCLIENTE, @Nombre , @Apellido, @Cedula," 
-      );
+        .request()
+        .input("IDCLIENTE", req.params.IDCLIENTE) // Cambiado a sql.Int
+        .input("Nombre", sql.VarChar(50), Nombre)
+        .input("Apellido", sql.VarChar(50), Apellido)
+        .input("Cedula", sql.VarChar(20), Cedula)
+        .input("Estado", sql.VarChar(20), Estado)
+        .query("EXEC SP_UpdateCliente @IDCLIENTE, @Nombre, @Apellido, @Cedula, @Estado");
   
       res.json({
-        IDCLIENTE,
         Nombre,
         Apellido,
-        Cedula, 
+        Cedula,
+        Estado,
+        IDCLIENTE: req.params.IDCLIENTE
       });
     } catch (error) {
-      res.status(500);
-      res.send(error.message);
+      res.status(500).send(error.message);
     }
   };
-
+  
   export const getClientebyID = async(req, res) =>
     {
         try{
@@ -134,7 +132,43 @@ export const geyClientebyID = async(req, res) =>
         }
     }
     
+    export const getClientesbyname = async (req, res) => {
+      try {
+        const pool = await getConnection();
+    
+        const result = await pool
+        .request()
+        .input("Nombre", req.params.Nombre)
+        .query("Exec SP_BuscaClientebyNombre @Nombre");
+    
+    
+    
+        const clientes = result.recordset
+        res.json(clientes);
+    
+      } catch (error) {
+        res.status(500).send(error.message);
+      }
+    };
 
+    export const getClientesInactivos = async(req,res) =>{
+
+      try{
+         
+          const pool = await getConnection();
+    
+          const result = await pool
+          .request().query("Exec SP_MostrarClientesInactivos")
+    
+          const cliente = result.recordset
+          res.status(200).json(cliente)
+      }catch(error){
+    
+          console.log('Error al obtener los clientes');
+          res.status(500).send('Error del servidor');
+      }
+    };
+    
 
 
 

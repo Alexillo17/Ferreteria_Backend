@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import{ReporteFactura, createnewDetalleFactura, createnewFactura, getFacturabyID, getUltimaFactura, EliminarProductodeFactura} from '../controllers/factura.controller.js' 
+import{ReporteFactura, createnewDetalleFactura, createnewFactura, getFacturabyID, getUltimaFactura, EliminarProductodeFactura, deletefactura} from '../controllers/factura.controller.js' 
 
 const router = Router();
 
@@ -15,5 +15,7 @@ router.post("/createfactura",createnewFactura);
 router.post("/createdetallefactura",createnewDetalleFactura);
 
 router.delete("/eliminarproducto/:NumeroFactura/:IdProducto", EliminarProductodeFactura);
+
+router.delete("/eliminarfactura/:NumFactura",deletefactura);
 
 export default router;
