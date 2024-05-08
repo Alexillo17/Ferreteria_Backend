@@ -16,7 +16,17 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // Routes
-app.use("/api", productRoutes,categoryRoutes,proveedorRoutes,facturaRoutes,empleadoRoutes,clienteRoutes);
+app.use("/cliente",clienteRoutes);
+
+app.use("/producto",productRoutes);
+
+app.use("/categoria",categoryRoutes);
+
+app.use("/proveedor",proveedorRoutes);
+
+app.use("/factura",facturaRoutes);
+
+app.use("/empleado",empleadoRoutes)
 
 
 export default app;
