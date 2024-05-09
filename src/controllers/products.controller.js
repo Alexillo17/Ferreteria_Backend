@@ -85,9 +85,9 @@ export const getProductbyId = async(req,res) => {
 };
 
 export const createNewProduct = async (req, res) => {
-  const { NOMBRE, UNIDADES, PRECIO, ESTADO, IDCATEGORIA, IDPROVEEDOR } = req.body;
+  const { NOMBRE, UNIDADES, PRECIO, ESTADO, IDCATEGORIA, IDPROVEEDOR, Stock } = req.body;
 
-  if (NOMBRE == null || UNIDADES == null || PRECIO == null || ESTADO == null || IDCATEGORIA == null || IDPROVEEDOR== null) {
+  if (NOMBRE == null || UNIDADES == null || PRECIO == null || ESTADO == null || IDCATEGORIA == null || IDPROVEEDOR== null || Stock == null) {
     return res.status(400).json({ msg: "Bad Request. Please fill all fields" });
   }
 
@@ -102,8 +102,9 @@ export const createNewProduct = async (req, res) => {
     .input("ESTADO", sql.VarChar, ESTADO)
     .input("IDCATEGORIA", sql.Int, IDCATEGORIA)
     .input("IDPROVEEDOR", sql.Int, IDPROVEEDOR)
+    .input("Stock", sql.Int, Stock)
     .query(
-      "EXEC SP_InsertarProducto @NOMBRE, @UNIDADES, @PRECIO, @ESTADO, @IDCATEGORIA, @IDPROVEEDOR" 
+      "EXEC SP_InsertarProducto @NOMBRE, @UNIDADES, @PRECIO, @ESTADO, @IDCATEGORIA, @IDPROVEEDOR, @Stock" 
     );
 
     res.json({
@@ -113,6 +114,7 @@ export const createNewProduct = async (req, res) => {
       ESTADO,
       IDCATEGORIA,
       IDPROVEEDOR,
+      Stock
     });
   } catch (error) {
     res.status(500);
@@ -121,9 +123,9 @@ export const createNewProduct = async (req, res) => {
 };
 
 export const UpdateProduct = async (req, res) =>{
-  const { NOMBRE, UNIDADES, PRECIO, ESTADO, IDCATEGORIA, IDPROVEEDOR } = req.body;
+  const { NOMBRE, UNIDADES, PRECIO, ESTADO, IDCATEGORIA, IDPROVEEDOR, Stock } = req.body;
 
-  if (NOMBRE == null || UNIDADES == null || PRECIO == null || ESTADO == null || IDCATEGORIA == null || IDPROVEEDOR== null) {
+  if (NOMBRE == null || UNIDADES == null || PRECIO == null || ESTADO == null || IDCATEGORIA == null || IDPROVEEDOR== null || Stock == null) {
     return res.status(400).json({ msg: "Bad Request. Please fill all fields" });
   }
 
@@ -139,8 +141,9 @@ export const UpdateProduct = async (req, res) =>{
     .input("ESTADO", sql.VarChar, ESTADO)
     .input("IDCATEGORIA", sql.Int, IDCATEGORIA)
     .input("IDPROVEEDOR", sql.Int, IDPROVEEDOR)
+    .input("Stock", sql.Int, Stock)
     .query(
-      "EXEC SP_ActualizarProducto  @IDPRODUCTO, @NOMBRE, @UNIDADES, @PRECIO, @ESTADO, @IDCATEGORIA, @IDPROVEEDOR;"
+      "EXEC SP_ActualizarProducto  @IDPRODUCTO, @NOMBRE, @UNIDADES, @PRECIO, @ESTADO, @IDCATEGORIA, @IDPROVEEDOR, @Stock"
     );
 
     if(result.rowsAffected[0] === 0 )return res.sendStatus(404);
@@ -152,6 +155,7 @@ export const UpdateProduct = async (req, res) =>{
       ESTADO,
       IDCATEGORIA,
       IDPROVEEDOR,
+      Stock,
       IDPRODUCTO: req.params.IDPRODUCTO
     });
   }catch(error){
