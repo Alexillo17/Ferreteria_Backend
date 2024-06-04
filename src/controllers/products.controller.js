@@ -85,7 +85,7 @@ export const getProductbyId = async(req,res) => {
 };
 
 export const createNewProduct = async (req, res) => {
-  const { NOMBRE, UNIDADES, PRECIO, ESTADO, IDCATEGORIA, IDPROVEEDOR, Stock } = req.body;
+  const { NOMBRE, UNIDADES, PRECIO, ESTADO, IDCATEGORIA, IDPROVEEDOR, Stock, Fecha } = req.body;
 
   if (NOMBRE == null || UNIDADES == null || PRECIO == null || ESTADO == null || IDCATEGORIA == null || IDPROVEEDOR== null || Stock == null) {
     return res.status(400).json({ msg: "Bad Request. Please fill all fields" });
@@ -103,8 +103,9 @@ export const createNewProduct = async (req, res) => {
     .input("IDCATEGORIA", sql.Int, IDCATEGORIA)
     .input("IDPROVEEDOR", sql.Int, IDPROVEEDOR)
     .input("Stock", sql.Int, Stock)
+    .input("Fecha", sql.Date, Fecha)
     .query(
-      "EXEC SP_InsertarProducto @NOMBRE, @UNIDADES, @PRECIO, @ESTADO, @IDCATEGORIA, @IDPROVEEDOR, @Stock" 
+      "EXEC SP_InsertarProducto @NOMBRE, @UNIDADES, @PRECIO, @ESTADO, @IDCATEGORIA, @IDPROVEEDOR, @Stock, @Fecha" 
     );
 
     res.json({
@@ -114,7 +115,8 @@ export const createNewProduct = async (req, res) => {
       ESTADO,
       IDCATEGORIA,
       IDPROVEEDOR,
-      Stock
+      Stock,
+      Fecha
     });
   } catch (error) {
     res.status(500);
@@ -123,9 +125,9 @@ export const createNewProduct = async (req, res) => {
 };
 
 export const UpdateProduct = async (req, res) =>{
-  const { NOMBRE, UNIDADES, PRECIO, ESTADO, IDCATEGORIA, IDPROVEEDOR, Stock } = req.body;
+  const { NOMBRE, UNIDADES, PRECIO, ESTADO, IDCATEGORIA, IDPROVEEDOR, Stock, Fecha } = req.body;
 
-  if (NOMBRE == null || UNIDADES == null || PRECIO == null || ESTADO == null || IDCATEGORIA == null || IDPROVEEDOR== null || Stock == null) {
+  if (NOMBRE == null || UNIDADES == null || PRECIO == null || ESTADO == null || IDCATEGORIA == null || IDPROVEEDOR== null || Stock == null || Fecha  == null) {
     return res.status(400).json({ msg: "Bad Request. Please fill all fields" });
   }
 
@@ -142,8 +144,9 @@ export const UpdateProduct = async (req, res) =>{
     .input("IDCATEGORIA", sql.Int, IDCATEGORIA)
     .input("IDPROVEEDOR", sql.Int, IDPROVEEDOR)
     .input("Stock", sql.Int, Stock)
+    .input("Fecha", sql.Date, Fecha)
     .query(
-      "EXEC SP_ActualizarProducto  @IDPRODUCTO, @NOMBRE, @UNIDADES, @PRECIO, @ESTADO, @IDCATEGORIA, @IDPROVEEDOR, @Stock"
+      "EXEC SP_ActualizarProducto  @IDPRODUCTO, @NOMBRE, @UNIDADES, @PRECIO, @ESTADO, @IDCATEGORIA, @IDPROVEEDOR, @Stock, @Fecha"
     );
 
     if(result.rowsAffected[0] === 0 )return res.sendStatus(404);
@@ -156,6 +159,7 @@ export const UpdateProduct = async (req, res) =>{
       IDCATEGORIA,
       IDPROVEEDOR,
       Stock,
+      Fecha,
       IDPRODUCTO: req.params.IDPRODUCTO
     });
   }catch(error){
@@ -294,4 +298,39 @@ export const Eliminarproducto = async(req, res) =>
           res.send(error.message);
       }
   }
+
+  export const GetProductsByDateWithPagination = async (req, res) => {
+    try {
+      const pool = await getConnection();
+      const { pageNumber, pageSize, fechaInicio, fechaFin } = req.query; 
+      const nombre = req.query.nombre || null;
+  
+      const pageNumberInt = parseInt(pageNumber, 10) || 1;
+      const pageSizeInt = parseInt(pageSize, 10) || 10;
+  
+      const result = await pool
+      .request()
+      .input("Nombre", nombre)
+      .input("FechaInicio", fechaInicio)
+      .input("FechaFin", fechaFin)
+      .query("Exec SP_MostrarProductosFecha @Nombre, @FechaInicio, @FechaFin");
+  
+      const startIndex = (pageNumberInt - 1) * pageSizeInt;
+      const endIndex = Math.min(startIndex + pageSizeInt, result.recordset.length);
+  
+      const products = result.recordset.slice(startIndex, endIndex);
+  
+      const response = {
+        totalItems: result.recordset.length,
+        products: products,
+        totalPages: Math.ceil(result.recordset.length / pageSizeInt),
+        currentPage: pageNumberInt
+      };
+  
+      res.json(response);
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  };
+  
 

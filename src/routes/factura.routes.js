@@ -1,10 +1,12 @@
 import { Router } from "express";
 
-import{ReporteFactura, createnewDetalleFactura, createnewFactura, getFacturabyID, getUltimaFactura, EliminarProductodeFactura, deletefactura} from '../controllers/factura.controller.js' 
+import{ReporteFactura, createnewDetalleFactura, createnewFactura, getFacturabyID, getUltimaFactura, EliminarProductodeFactura, deletefactura, ReporteFacturaDate} from '../controllers/factura.controller.js' 
 
 const router = Router();
 
 router.get("/factura",ReporteFactura);
+
+router.get("/facturasbyDate/:FechaInicio/:FechaFin",ReporteFacturaDate);
 
 router.get('/ultimafactura',getUltimaFactura);
 

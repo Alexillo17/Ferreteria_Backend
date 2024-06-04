@@ -9,7 +9,8 @@ import {
   getAllProductsbyName,
   getProductsInactivoswithPagination,
   Eliminarproducto,
-  GetProductInactivosbyNamewithPagination
+  GetProductInactivosbyNamewithPagination,
+  GetProductsByDateWithPagination
 } from "../controllers/products.controller.js";
 
 const router = Router();
@@ -33,6 +34,8 @@ router.post("/createproducts", createNewProduct);
 router.get("/buscarproducts/:NOMBRE", GetProductbyNamewithPagination);
 
 router.get("/buscarproductsinactivos/:NOMBRE", GetProductInactivosbyNamewithPagination);
+
+router.get("/buscarproductosfecha", GetProductsByDateWithPagination);
 
 
 

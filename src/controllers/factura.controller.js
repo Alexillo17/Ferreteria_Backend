@@ -34,6 +34,40 @@ export const ReporteFactura = async (req, res) => {
       res.status(500).send('Error del servidor');
     }
   };
+  
+  export const ReporteFacturaDate = async (req, res) => {
+    try {
+      const pool = await getConnection();
+      const { pageNumber, pageSize } = req.query;
+      const { FechaInicio, FechaFin } = req.params; // Obtenemos las fechas de los parámetros
+  
+      const pageNumberInt = parseInt(pageNumber, 10) || 1;
+      const pageSizeInt = parseInt(pageSize, 10) || 10;
+  
+      const result = await pool.request()
+        .input("FechaInicio", sql.Date, FechaInicio) // Corregimos los tipos de los parámetros
+        .input("FechaFin", sql.Date, FechaFin)
+        .execute('SP_MostrarFacturasFecha'); // Ejecutamos el procedimiento almacenado
+  
+      const startIndex = (pageNumberInt - 1) * pageSizeInt;
+      const endIndex = Math.min(startIndex + pageSizeInt, result.recordset.length);
+  
+      const facturas = result.recordset.slice(startIndex, endIndex);
+  
+      const response = {
+        totalFacturas: result.recordset.length,
+        facturas: facturas,
+        totalPages: Math.ceil(result.recordset.length / pageSizeInt),
+        currentPage: pageNumberInt
+      };
+  
+      res.json(response);
+    } catch (error) {
+      console.log('Error al obtener la factura', error.message);
+      res.status(500).send('Error del servidor');
+    }
+  };
+  
 
   export const getFacturabyID = async(req, res) =>
   {
