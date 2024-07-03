@@ -10,7 +10,11 @@ import {
   getProductsInactivoswithPagination,
   Eliminarproducto,
   GetProductInactivosbyNamewithPagination,
-  GetProductsByDateWithPagination
+  GetProductsByDateWithPagination,
+  getRegistroAllProducts,
+  getAllProductsbyNameProveedor,
+  createregistroProduct,
+  getAllProductsActivo
 } from "../controllers/products.controller.js";
 
 const router = Router();
@@ -20,6 +24,8 @@ router.get("/products", getProductswithPagination);
 router.get("/productsinactivos", getProductsInactivoswithPagination);
 
 router.get("/allproducts", getAllProducts);
+
+router.get("/allproductsactivo", getAllProductsActivo);
 
 router.get("/allproducts/:NOMBRE",getAllProductsbyName);
 
@@ -37,6 +43,13 @@ router.get("/buscarproductsinactivos/:NOMBRE", GetProductInactivosbyNamewithPagi
 
 router.get("/buscarproductosfecha", GetProductsByDateWithPagination);
 
+router.get("/AllProducttsRegister",getRegistroAllProducts);
+
+router.get("/SearchbyProveedor/:NOMBRE/:idProveedor",getAllProductsbyNameProveedor);
+
+router.get("/SearchProductbyProveedor/:idProveedor",getAllProductsbyNameProveedor);
+
+router.post("/createregistroproduct",createregistroProduct);
 
 
 

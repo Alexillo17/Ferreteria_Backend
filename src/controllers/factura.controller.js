@@ -67,6 +67,31 @@ export const ReporteFactura = async (req, res) => {
       res.status(500).send('Error del servidor');
     }
   };
+
+  export const ReporteFacturaDatePDF = async (req, res) => {
+    try {
+      const pool = await getConnection();
+      const { FechaInicio, FechaFin } = req.params; // Obtenemos las fechas de los parámetros
+  
+      const result = await pool.request()
+        .input("FechaInicio", sql.Date, FechaInicio) // Corregimos los tipos de los parámetros
+        .input("FechaFin", sql.Date, FechaFin)
+        .execute('SP_MostrarFacturasFecha'); // Ejecutamos el procedimiento almacenado
+  
+      const facturas = result.recordset;
+  
+      const response = {
+        totalFacturas: facturas.length,
+        facturas: facturas
+      };
+  
+      res.json(response);
+    } catch (error) {
+      console.log('Error al obtener la factura', error.message);
+      res.status(500).send('Error del servidor');
+    }
+  };
+  
   
 
   export const getFacturabyID = async(req, res) =>
@@ -203,3 +228,26 @@ export const ReporteFactura = async (req, res) => {
     }
   };
 
+  export const UpdateCantidadFactura = async (req, res) => {
+    const { Cantidad, NumeroFactura, IdProducto} = req.body;
+  
+  
+    try {
+      const pool = await getConnection();
+  
+      const result = await pool
+        .request()
+        .input("NumeroFactura", req.params.NumeroFactura) // Cambiado a sql.Int
+        .input("IdProducto", req.params.IdProducto) // Cambiado a sql.Int
+        .input("Cantidad", sql.Int, Cantidad)
+        .query("EXEC SP_EditarCantidadFactura @NumeroFactura, @IdProducto, @Cantidad");
+  
+      res.json({
+       Cantidad,
+       NumeroFactura: req.params.NumeroFactura,
+      IdProducto: req.params.IdProducto
+      });
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  };

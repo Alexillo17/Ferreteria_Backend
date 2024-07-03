@@ -87,7 +87,7 @@ export const getProductbyId = async(req,res) => {
 export const createNewProduct = async (req, res) => {
   const { NOMBRE, UNIDADES, PRECIO, ESTADO, IDCATEGORIA, IDPROVEEDOR, Stock, Fecha } = req.body;
 
-  if (NOMBRE == null || UNIDADES == null || PRECIO == null || ESTADO == null || IDCATEGORIA == null || IDPROVEEDOR== null || Stock == null) {
+  if (NOMBRE == null || UNIDADES == null || PRECIO == null || ESTADO == null || IDCATEGORIA == null || IDPROVEEDOR== null || Stock == null || Fecha == null) {
     return res.status(400).json({ msg: "Bad Request. Please fill all fields" });
   }
 
@@ -124,10 +124,41 @@ export const createNewProduct = async (req, res) => {
   }
 };
 
+export const createregistroProduct = async (req, res) => {
+  const { idProducto, Cantidad, Fecha } = req.body;
+
+  if (idProducto == null || Cantidad == null || Fecha == null) {
+    return res.status(400).json({ msg: "Bad Request. Please fill all fields" });
+  }
+
+  try {
+    const pool = await getConnection();
+
+    const result = await pool
+    .request()
+    .input("idProducto", sql.Int, idProducto)
+    .input("Cantidad", sql.Int, Cantidad)
+    .input("Fecha", sql.Date, Fecha)
+    .query(
+      "EXEC SP_InsertarRegistro  @idProducto, @Cantidad, @Fecha" 
+    );
+
+    res.json({
+idProducto,
+Cantidad,
+ Fecha
+    });
+  } catch (error) {
+    res.status(500);
+    res.send(error.message);
+  }
+};
+
+
 export const UpdateProduct = async (req, res) =>{
   const { NOMBRE, UNIDADES, PRECIO, ESTADO, IDCATEGORIA, IDPROVEEDOR, Stock, Fecha } = req.body;
 
-  if (NOMBRE == null || UNIDADES == null || PRECIO == null || ESTADO == null || IDCATEGORIA == null || IDPROVEEDOR== null || Stock == null || Fecha  == null) {
+  if (NOMBRE == null || UNIDADES == null || PRECIO == null || ESTADO == null || IDCATEGORIA == null || IDPROVEEDOR== null) {
     return res.status(400).json({ msg: "Bad Request. Please fill all fields" });
   }
 
@@ -143,10 +174,8 @@ export const UpdateProduct = async (req, res) =>{
     .input("ESTADO", sql.VarChar, ESTADO)
     .input("IDCATEGORIA", sql.Int, IDCATEGORIA)
     .input("IDPROVEEDOR", sql.Int, IDPROVEEDOR)
-    .input("Stock", sql.Int, Stock)
-    .input("Fecha", sql.Date, Fecha)
     .query(
-      "EXEC SP_ActualizarProducto  @IDPRODUCTO, @NOMBRE, @UNIDADES, @PRECIO, @ESTADO, @IDCATEGORIA, @IDPROVEEDOR, @Stock, @Fecha"
+      "EXEC SP_ActualizarProducto  @IDPRODUCTO, @NOMBRE, @UNIDADES, @PRECIO, @ESTADO, @IDCATEGORIA, @IDPROVEEDOR"
     );
 
     if(result.rowsAffected[0] === 0 )return res.sendStatus(404);
@@ -158,8 +187,6 @@ export const UpdateProduct = async (req, res) =>{
       ESTADO,
       IDCATEGORIA,
       IDPROVEEDOR,
-      Stock,
-      Fecha,
       IDPRODUCTO: req.params.IDPRODUCTO
     });
   }catch(error){
@@ -247,7 +274,43 @@ export const getAllProducts = async(req,res) =>{
     const pool  = await getConnection();
 
     const result = await pool
+    .request().query("Exec SP_MostrarProductoExistencia")
+
+    const product = result.recordset
+    res.status(200).json(product);
+
+  }catch(error){
+    console.log('Error al obtener los productos',error.message);
+        res.status(500).send('Error del servidor');
+
+  }
+}
+
+export const getAllProductsActivo = async(req,res) =>{
+  try{
+
+    const pool  = await getConnection();
+
+    const result = await pool
     .request().query("Exec SP_MostrarProducto")
+
+    const product = result.recordset
+    res.status(200).json(product);
+
+  }catch(error){
+    console.log('Error al obtener los productos',error.message);
+        res.status(500).send('Error del servidor');
+
+  }
+}
+
+export const getRegistroAllProducts = async(req,res) =>{
+  try{
+
+    const pool  = await getConnection();
+
+    const result = await pool
+    .request().query("Exec SP_MostrarTodosLosProducto")
 
     const product = result.recordset
     res.status(200).json(product);
@@ -269,6 +332,41 @@ export const getAllProductsbyName = async (req, res) => {
     .query("Exec SP_MostrarProductoporNombre @NOMBRE");
 
 
+
+    const products = result.recordset
+    res.json(products);
+
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+};
+
+export const getAllProductsbyNameProveedor = async (req, res) => {
+  try {
+    const pool = await getConnection();
+
+    const result = await pool
+    .request()
+    .input("NOMBRE", req.params.NOMBRE)
+    .input("idProveedor", req.params.idProveedor)
+    .query("Exec SP_MostrarTodosLosProductoConsulta @NOMBRE, @idProveedor");
+
+    const products = result.recordset
+    res.json(products);
+
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+};
+
+export const getAllProductsbyProveedor = async (req, res) => {
+  try {
+    const pool = await getConnection();
+
+    const result = await pool
+    .request()
+    .input("idProveedor", req.params.idProveedor)
+    .query("Exec SP_MostrarTodosLosProductoConsultaProveedor @idProveedor");
 
     const products = result.recordset
     res.json(products);
